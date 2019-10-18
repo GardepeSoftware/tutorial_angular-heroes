@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+
 import { Hero } from "../hero";
 import { HeroService } from "../hero.service";
 
@@ -9,19 +10,33 @@ import { HeroService } from "../hero.service";
 })
 export class HeroesComponent implements OnInit {
   heroes: Hero[];
-  selectedHero: Hero;
 
   constructor(private heroService: HeroService) {}
 
   ngOnInit() {
-    this.getHeros();
+    this.getHeroes();
   }
 
-  onSelect(hero: Hero) {
-    this.selectedHero = hero;
+  add(name: string): void {
+    name = name.trim();
+    if (!name) {
+      return;
+    }
+
+    this.heroService.addHero({ name } as Hero).subscribe(hero => {
+      this.heroes.push(hero);
+    });
   }
 
-  getHeros(): void {
+  delete(hero: Hero): void {
+    // This removes the removed hero from it's local list
+    this.heroes = this.heroes.filter(h => h !== hero);
+
+    // We're not actually subscribing to anything here but Observables won't do anything until they're subscribed to
+    this.heroService.deleteHero(hero).subscribe();
+  }
+
+  getHeroes(): void {
     this.heroService.getHeroes().subscribe(heroes => (this.heroes = heroes));
   }
 }
